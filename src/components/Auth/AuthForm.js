@@ -19,40 +19,42 @@ const AuthForm = () => {
     const enteredPassword = passwordInputRef.current.value;
 
     setIsLoading(true);
-
+    let url;
     if (isLogin) {
+      url =
+        "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyD-eb2P8uSx1N3ACu4C_ipUFr8OGbPSDIU";
     } else {
-      try {
-        const response = await fetch(
-          "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyD-eb2P8uSx1N3ACu4C_ipUFr8OGbPSDIU",
-          {
-            method: "POST",
-            body: JSON.stringify({
-              email: enteredEmail,
-              password: enteredPassword,
-              returnSecureToken: true,
-            }),
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
+      url =
+        "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyD-eb2P8uSx1N3ACu4C_ipUFr8OGbPSDIU";
+    }
 
-        setIsLoading(false);
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        body: JSON.stringify({
+          email: enteredEmail,
+          password: enteredPassword,
+          returnSecureToken: true,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
-        if (response.ok) {
-        } else {
-          const data = await response.json();
-          let errorMessage = "Authentication failed!";
-          if (data && data.error && data.error.message) {
-            errorMessage = data.error.message;
-          }
-          alert(errorMessage);
+      setIsLoading(false);
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data);
+      } else {
+        const errorData = await response.json();
+        let errorMessage = "Authentication failed!";
+        if (errorData && errorData.error && errorData.error.message) {
+          errorMessage = errorData.error.message;
         }
-      } catch (error) {
-        setIsLoading(false);
-        console.log("Error:", error);
+        throw new Error(errorMessage);
       }
+    } catch (err) {
+      alert(err.message);
     }
   };
 
